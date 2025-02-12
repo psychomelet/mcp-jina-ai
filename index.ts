@@ -15,6 +15,8 @@ import {
   SearchResponseSchema,
   GroundingSchema,
   GroundingResponseSchema,
+  SearchCaseSchema,
+  SearchCaseResponseSchema,
 } from "./schemas.js";
 
 // Ensure the Jina API key is provided
@@ -120,6 +122,31 @@ async function groundStatement(
   return GroundingResponseSchema.parse(json);
 }
 
+async function searchCase(
+  params: z.infer<typeof SearchCaseSchema>
+): Promise<z.infer<typeof SearchCaseResponseSchema>> {
+  const headers = createHeaders({
+    "X-Retain-Images": "none",
+    "X-Return-Format": "markdown",
+    "X-Site": "https://casetext.com/"
+  });
+
+  const queryString = encodeURIComponent(params.query);
+  const url = `${JINA_SEARCH_ENDPOINT}${queryString}?count=1`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Jina AI Search API error: ${response.statusText}`);
+  }
+
+  const json = await response.json();
+  return SearchResponseSchema.parse(json);
+}
+
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
@@ -163,6 +190,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "fact_check": {
         const args = GroundingSchema.parse(request.params.arguments);
         const result = await groundStatement(args);
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+      }
+      case "search_case": {
+        const args = SearchCaseSchema.parse(request.params.arguments);
+        const result = await searchCase(args);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
       default:

@@ -31,14 +31,10 @@ export const ReaderResponseSchema = z.object({
   }),
 });
 
-export const ReadWebPageSchema = z.object({
-  url: z.string(),
-});
-
 // Search Schemas
 export const SearchWebSchema = z.object({
   query: z.string(),
-  count: z.number().optional().default(2),
+  count: z.number().optional().default(3),
 });
 
 export const SearchResponseSchema = z.object({
@@ -82,9 +78,34 @@ export const GroundingResponseSchema = z.object({
   }),
 });
 
+export const SearchCaseSchema = z.object({
+  query: z.string()
+});
+
+export const SearchCaseResponseSchema = z.object({
+  code: z.number(),
+  status: z.number(),
+  data: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string().optional(),
+      url: z.string(),
+      content: z.string(),
+      images: z.record(z.string()).optional(),
+      links: z.record(z.string()).optional(),
+      usage: z.object({
+        tokens: z.number(),
+      }),
+    })
+  ),
+});
+
 export type ReaderRequest = z.infer<typeof ReaderRequestSchema>;
 export type ReaderResponse = z.infer<typeof ReaderResponseSchema>;
 export type SearchWebRequest = z.infer<typeof SearchWebSchema>;
 export type SearchResponse = z.infer<typeof SearchResponseSchema>;
 export type GroundingRequest = z.infer<typeof GroundingSchema>;
 export type GroundingResponse = z.infer<typeof GroundingResponseSchema>;
+export type SearchCaseRequest = z.infer<typeof SearchCaseSchema>;
+export type SearchCaseResponse = z.infer<typeof SearchCaseResponseSchema>;
+
