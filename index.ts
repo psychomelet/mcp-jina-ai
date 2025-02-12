@@ -137,7 +137,7 @@ async function searchCase(
     "X-Engine": "direct",
     "X-Retain-Images": "none",
     "X-Return-Format": "markdown",
-    "X-Site": "https://casetext.com/"
+    "X-Site": "https://justia.com/"
   });
 
   const queryString = encodeURIComponent(params.query);
