@@ -134,6 +134,7 @@ async function searchCase(
   params: SearchCase
 ): Promise<SearchCaseResponse> {
   const headers = createHeaders({
+    "X-Engine": "direct",
     "X-Retain-Images": "none",
     "X-Return-Format": "markdown",
     "X-Site": "https://casetext.com/"
