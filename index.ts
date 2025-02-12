@@ -9,14 +9,22 @@ import fetch from "node-fetch";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import {
-  ReadWebPageSchema,
+  Reader,
+  ReaderResponse,
+  Search,
+  SearchResponse,
+  Grounding,
+  GroundingResponse,
+  SearchCase,
+  SearchCaseResponse,
   ReaderResponseSchema,
-  SearchWebSchema,
   SearchResponseSchema,
-  GroundingSchema,
   GroundingResponseSchema,
-  SearchCaseSchema,
   SearchCaseResponseSchema,
+  ReaderSchema,
+  SearchSchema,
+  GroundingSchema,
+  SearchCaseSchema,
 } from "./schemas.js";
 
 // Ensure the Jina API key is provided
@@ -52,8 +60,8 @@ function createHeaders(additional: Record<string, string> = {}): Record<string, 
 }
 
 async function readWebPage(
-  params: z.infer<typeof ReadWebPageSchema>
-): Promise<z.infer<typeof ReaderResponseSchema>> {
+  params: Reader
+): Promise<ReaderResponse> {
   const headers = createHeaders({
     "Content-Type": "application/json",
     "X-Retain-Images": "none",
@@ -76,8 +84,8 @@ async function readWebPage(
 }
 
 async function searchWeb(
-  params: z.infer<typeof SearchWebSchema>
-): Promise<z.infer<typeof SearchResponseSchema>> {
+  params: Search
+): Promise<SearchResponse> {
   const headers = createHeaders({
     "X-Retain-Images": "none",
     "X-Return-Format": "markdown",
@@ -100,8 +108,8 @@ async function searchWeb(
 }
 
 async function groundStatement(
-  params: z.infer<typeof GroundingSchema>
-): Promise<z.infer<typeof GroundingResponseSchema>> {
+  params: Grounding
+): Promise<GroundingResponse> {
   const headers = createHeaders();
 
   const statementQuery = encodeURIComponent(params.statement);
@@ -123,8 +131,8 @@ async function groundStatement(
 }
 
 async function searchCase(
-  params: z.infer<typeof SearchCaseSchema>
-): Promise<z.infer<typeof SearchCaseResponseSchema>> {
+  params: SearchCase
+): Promise<SearchCaseResponse> {
   const headers = createHeaders({
     "X-Retain-Images": "none",
     "X-Return-Format": "markdown",
@@ -144,7 +152,7 @@ async function searchCase(
   }
 
   const json = await response.json();
-  return SearchResponseSchema.parse(json);
+  return SearchCaseResponseSchema.parse(json);
 }
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -154,12 +162,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "read_webpage",
         description:
           "Extract content from a webpage (url) in a format optimized for LLMs",
-        inputSchema: zodToJsonSchema(ReadWebPageSchema),
+        inputSchema: zodToJsonSchema(ReaderSchema),
       },
       {
         name: "search_web",
         description: "Search the web for information",
-        inputSchema: zodToJsonSchema(SearchWebSchema),
+        inputSchema: zodToJsonSchema(SearchSchema),
       },
       {
         name: "fact_check",
@@ -183,12 +191,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     switch (request.params.name) {
       case "read_webpage": {
-        const args = ReadWebPageSchema.parse(request.params.arguments);
+        const args = ReaderSchema.parse(request.params.arguments);
         const result = await readWebPage(args);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }
       case "search_web": {
-        const args = SearchWebSchema.parse(request.params.arguments);
+        const args = SearchSchema.parse(request.params.arguments);
         const result = await searchWeb(args);
         return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
       }

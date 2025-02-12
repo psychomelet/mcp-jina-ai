@@ -10,8 +10,7 @@ export const ImageContentSchema = z.object({
   mimeType: z.string(),
 });
 
-// Reader Schemas
-export const ReaderRequestSchema = z.object({
+export const ReaderSchema = z.object({
   url: z.string(),
 });
 
@@ -32,7 +31,7 @@ export const ReaderResponseSchema = z.object({
 });
 
 // Search Schemas
-export const SearchWebSchema = z.object({
+export const SearchSchema = z.object({
   query: z.string(),
   count: z.number().optional().default(3),
 });
@@ -100,12 +99,12 @@ export const SearchCaseResponseSchema = z.object({
   ),
 });
 
-export type ReaderRequest = z.infer<typeof ReaderRequestSchema>;
+export type Reader = z.infer<typeof ReaderSchema>;
 export type ReaderResponse = z.infer<typeof ReaderResponseSchema>;
-export type SearchWebRequest = z.infer<typeof SearchWebSchema>;
+export type Search = z.infer<typeof SearchSchema>;
 export type SearchResponse = z.infer<typeof SearchResponseSchema>;
-export type GroundingRequest = z.infer<typeof GroundingSchema>;
+export type Grounding = z.infer<typeof GroundingSchema>;
 export type GroundingResponse = z.infer<typeof GroundingResponseSchema>;
-export type SearchCaseRequest = z.infer<typeof SearchCaseSchema>;
+export type SearchCase = z.infer<typeof SearchCaseSchema>;
 export type SearchCaseResponse = z.infer<typeof SearchCaseResponseSchema>;
 
