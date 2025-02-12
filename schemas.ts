@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-// Common schemas
+// Common Content Schemas
 export const TextContentSchema = z.object({
   text: z.string(),
 });
@@ -10,10 +10,9 @@ export const ImageContentSchema = z.object({
   mimeType: z.string(),
 });
 
-// Reader schemas
+// Reader Schemas
 export const ReaderRequestSchema = z.object({
   url: z.string(),
-  options: z.enum(['Default', 'Markdown', 'HTML', 'Text', 'Screenshot', 'Pageshot']).optional()
 });
 
 export const ReaderResponseSchema = z.object({
@@ -27,53 +26,49 @@ export const ReaderResponseSchema = z.object({
     images: z.record(z.string()).optional(),
     links: z.record(z.string()).optional(),
     usage: z.object({
-      tokens: z.number()
-    })
-  })
+      tokens: z.number(),
+    }),
+  }),
 });
 
 export const ReadWebPageSchema = z.object({
   url: z.string(),
-  format: z.enum(['Default', 'Markdown', 'HTML', 'Text', 'Screenshot', 'Pageshot']).optional(),
-  with_links: z.boolean().optional(),
-  with_images: z.boolean().optional(),
-  with_generated_alt: z.boolean().optional(),
-  no_cache: z.boolean().optional()
 });
 
+// Search Schemas
 export const SearchWebSchema = z.object({
   query: z.string(),
-  count: z.number().optional().default(5),
-  retain_images: z.enum(['none', 'all']).optional().default('none'),
-  with_generated_alt: z.boolean().optional().default(true),
-  return_format: z.enum(['markdown', 'text', 'html']).optional().default('markdown')
+  count: z.number().optional().default(2),
 });
 
 export const SearchResponseSchema = z.object({
   code: z.number(),
   status: z.number(),
-  data: z.array(z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    url: z.string(),
-    content: z.string(),
-    images: z.record(z.string()).optional(),
-    links: z.record(z.string()).optional(),
-    usage: z.object({
-      tokens: z.number()
+  data: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string().optional(),
+      url: z.string(),
+      content: z.string(),
+      images: z.record(z.string()).optional(),
+      links: z.record(z.string()).optional(),
+      usage: z.object({
+        tokens: z.number(),
+      }),
     })
-  }))
+  ),
 });
 
+// Grounding Schemas
 export const GroundingSchema = z.object({
   statement: z.string(),
-  deepdive: z.boolean().optional().default(false)
+  deepdive: z.boolean().optional().default(false),
 });
 
 export const GroundingReferenceSchema = z.object({
   url: z.string(),
   keyQuote: z.string(),
-  isSupportive: z.boolean()
+  isSupportive: z.boolean(),
 });
 
 export const GroundingResponseSchema = z.object({
@@ -83,8 +78,8 @@ export const GroundingResponseSchema = z.object({
     factuality: z.number(),
     result: z.boolean(),
     reason: z.string(),
-    references: z.array(GroundingReferenceSchema)
-  })
+    references: z.array(GroundingReferenceSchema),
+  }),
 });
 
 export type ReaderRequest = z.infer<typeof ReaderRequestSchema>;
