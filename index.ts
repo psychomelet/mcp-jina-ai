@@ -158,13 +158,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "search_web",
-        description: "Search the web using Jina AI's search API",
+        description: "Search the web for information",
         inputSchema: zodToJsonSchema(SearchWebSchema),
       },
       {
         name: "fact_check",
-        description: "Fact-check a statement using Jina AI's grounding engine",
+        description: "Fact-check a statement using web search",
         inputSchema: zodToJsonSchema(GroundingSchema),
+      },
+      {
+        name: "search_case",
+        description: "Search for a legal case using web search",
+        inputSchema: zodToJsonSchema(SearchCaseSchema),
       },
     ],
   };
