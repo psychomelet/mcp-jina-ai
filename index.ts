@@ -130,30 +130,59 @@ async function groundStatement(
   return GroundingResponseSchema.parse(json);
 }
 
-async function searchCase(
-  params: SearchCase
-): Promise<SearchCaseResponse> {
-  const headers = createHeaders({
+async function searchCase(params: SearchCase): Promise<SearchCaseResponse> {
+  const queryString = encodeURIComponent(params.query);
+
+  // Helper function to perform a search with given headers and count.
+  async function performSearch(headers: Record<string, string>, count: number): Promise<SearchCaseResponse> {
+    const url = `${JINA_SEARCH_ENDPOINT}${queryString}?count=${count}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers,
+    });
+    if (!response.ok) {
+      throw new Error(`Jina AI Search API error: ${response.statusText}`);
+    }
+    const json = await response.json();
+    return SearchCaseResponseSchema.parse(json);
+  }
+
+  // Step 1: Primary search using justia.com
+  let headers = createHeaders({
+    "X-Engine": "direct",
+    "X-Retain-Images": "none",
+    "X-Return-Format": "markdown",
+    "X-Site": "https://casetext.com/"
+  });
+  let result = await performSearch(headers, 1);
+
+  if (result.data && result.data.length > 0) {
+    return result;
+  }
+
+  // Step 2: Fallback to casetext.com if no results from justia.com
+  headers = createHeaders({
     "X-Engine": "direct",
     "X-Retain-Images": "none",
     "X-Return-Format": "markdown",
     "X-Site": "https://justia.com/"
   });
+  result = await performSearch(headers, 1);
 
-  const queryString = encodeURIComponent(params.query);
-  const url = `${JINA_SEARCH_ENDPOINT}${queryString}?count=1`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Jina AI Search API error: ${response.statusText}`);
+  if (result.data && result.data.length > 0) {
+    return result;
   }
 
-  const json = await response.json();
-  return SearchCaseResponseSchema.parse(json);
+  // Step 3: General search without X-Site header and with count=3
+  headers = createHeaders({
+    "X-Engine": "direct",
+    "X-Retain-Images": "none",
+    "X-Return-Format": "markdown"
+    // No X-Site header for a broader search.
+  });
+  result = await performSearch(headers, 3);
+
+  return result;
 }
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
